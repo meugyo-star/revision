@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Lesson 5 Grammar Check</title>
+<style>
+:root{--bg:#f6f8fb;--card:#fff;--ink:#1f2937;--sub:#64748b;--line:#dbe3ec;--accent:#2563eb;--soft:#eef4ff;--orange:#f59e0b}
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans KR","Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:820px;margin:0 auto;padding:18px}.top{background:linear-gradient(135deg,#eff6ff,#f8fbff);border:1px solid #d7e5ff;border-radius:22px;padding:22px;margin-bottom:16px}
+h1{margin:0 0 8px;font-size:28px}.desc{color:var(--sub);line-height:1.55;font-size:14px}.student{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.student input{width:100%;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:16px;background:white}.progressBox{background:white;border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin-bottom:16px}
+.progressText{display:flex;justify-content:space-between;font-size:14px;margin-bottom:8px}.bar{height:10px;background:#e8eef5;border-radius:999px;overflow:hidden}.bar>div{height:100%;width:0;background:var(--accent);transition:.25s}
+.qcard{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 6px 24px rgba(15,23,42,.05)}.badge{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:700;padding:7px 10px;border-radius:999px;background:var(--soft);color:var(--accent);margin-bottom:14px}.badge.advanced{background:#fff7ed;color:#c2410c}
+.ko{font-size:22px;font-weight:800;line-height:1.45;margin-bottom:8px}.zh,.ru{font-size:15px;line-height:1.55;color:#475569;margin-bottom:4px}.questionBlock{padding-bottom:16px;border-bottom:1px solid #edf1f5}.options{display:grid;gap:10px;margin-top:16px}
+.option{display:flex;align-items:flex-start;gap:10px;padding:13px 14px;border:1.5px solid var(--line);border-radius:14px;background:#fff;cursor:pointer;transition:.15s;font-size:16px;line-height:1.4}.option:hover{border-color:#9fbdf5;background:#f8fbff}.option.selected{border-color:var(--accent);background:#eef4ff}.option input{margin-top:4px}
+.nav{display:flex;justify-content:space-between;gap:10px;margin-top:18px}button{border:0;border-radius:12px;padding:12px 18px;font-size:15px;font-weight:800;cursor:pointer}.secondary{background:#e9eef5;color:#334155}.primary{background:var(--accent);color:white}.primary:disabled{opacity:.45;cursor:not-allowed}.result{display:none}
+.scoreGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:18px 0}.scoreBox{background:white;border:1px solid var(--line);border-radius:18px;padding:18px;text-align:center}.scoreBox .label{font-size:13px;color:var(--sub);margin-bottom:6px}.scoreBox .score{font-size:30px;font-weight:900}.wrong{background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;margin-top:14px}.wrong strong{display:block;margin-bottom:8px}.note{font-size:13px;color:var(--sub);line-height:1.5}.restart{margin-top:14px;width:100%;background:#111827;color:#fff}
+@media(max-width:640px){.student{grid-template-columns:1fr}.scoreGrid{grid-template-columns:1fr}.ko{font-size:19px}.qcard{padding:18px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div id="quizArea">
+  <div class="top">
+    <h1>Lesson 5 Grammar Check</h1>
+    <div class="desc">기본 12문제 + 심화 8문제<br>基础题 12题 + 进阶题 8题<br>12 базовых + 8 повышенной сложности</div>
+    <div class="student">
+      <input id="className" placeholder="반 / 班级 / Класс" />
+      <input id="studentName" placeholder="이름 / 姓名 / Имя" />
+    </div>
+  </div>
+  <div class="progressBox">
+    <div class="progressText"><span id="progressLabel">1 / 20</span><span id="sectionLabel">기본 / 基础 / Базовый</span></div>
+    <div class="bar"><div id="barFill"></div></div>
+  </div>
+  <div class="qcard">
+    <div id="badge" class="badge">기본 / 基础 / Базовый</div>
+    <div class="questionBlock"><div class="ko" id="koQ"></div><div class="zh" id="zhQ"></div><div class="ru" id="ruQ"></div></div>
+    <div id="options" class="options"></div>
+    <div class="nav"><button id="prevBtn" class="secondary">← 이전</button><button id="nextBtn" class="primary" disabled>다음 →</button></div>
+  </div>
+</div>
+<div id="resultArea" class="result">
+  <div class="top"><h1>결과 / 结果 / Результат</h1><div class="desc" id="who"></div></div>
+  <div class="scoreGrid">
+    <div class="scoreBox"><div class="label">기본 / 基础 / Базовый</div><div id="basicScore" class="score">0 / 12</div></div>
+    <div class="scoreBox"><div class="label">심화 / 进阶 / Продвинутый</div><div id="advScore" class="score">0 / 8</div></div>
+    <div class="scoreBox"><div class="label">총점 / 总分 / Итого</div><div id="totalScore" class="score">0 / 20</div></div>
+  </div>
+  <div class="wrong"><strong>다시 볼 문제 / 需要复习的题目 / Вопросы для повторения</strong><div id="wrongList"></div><div class="note" style="margin-top:10px;">이 점수는 정답을 바로 보여주지 않는 진단용입니다. 종이 학습지에서 규칙을 다시 정리해 보세요.<br>这是诊断用测验，不会立即显示正确答案。请在纸质学习单上再次整理规则。<br>Это диагностический тест: правильные ответы сразу не показываются. Повторите правила на рабочем листе.</div></div>
+  <button class="restart" onclick="restartQuiz()">다시 풀기 / 再做一次 / Пройти ещё раз</button>
+</div>
+</div>
+<script>
+const qs = [
+  {level:"basic", type:"choice", ko:"tall의 비교급은?", zh:"tall 的比较级是？", ru:"Какая сравнительная степень у tall?", options:["tall","taller","tallest","more tall"], answer:1},
+  {level:"basic", type:"choice", ko:"small의 최상급은?", zh:"small 的最高级是？", ru:"Какая превосходная степень у small?", options:["small","smaller","smallest","most small"], answer:2},
+  {level:"basic", type:"choice", ko:"wide의 비교급은?", zh:"wide 的比较级是？", ru:"Какая сравнительная степень у wide?", options:["wider","wideer","widest","more wide"], answer:0},
+  {level:"basic", type:"choice", ko:"large의 최상급은?", zh:"large 的最高级是？", ru:"Какая превосходная степень у large?", options:["larger","largest","largeest","most large"], answer:1},
+  {level:"basic", type:"choice", ko:"fast의 비교급은?", zh:"fast 的比较级是？", ru:"Какая сравнительная степень у fast?", options:["faster","fastest","more fast","fastter"], answer:0},
+  {level:"basic", type:"choice", ko:"다음 중 맞는 것은?", zh:"下面哪一个是正确的？", ru:"Какой вариант правильный?", options:["tall → more tall","small → smalller","wide → wider","fast → more fast"], answer:2},
+
+  {level:"basic", type:"choice", ko:"학생 한 명이 교실에 있다. → There ___ a student in the classroom.", zh:"教室里有一名学生。→ There ___ a student in the classroom.", ru:"В классе есть один ученик. → There ___ a student in the classroom.", options:["is","are"], answer:0},
+  {level:"basic", type:"choice", ko:"책상 위에 책이 세 권 있다. → There ___ three books on the desk.", zh:"桌子上有三本书。→ There ___ three books on the desk.", ru:"На столе лежат три книги. → There ___ three books on the desk.", options:["is","are"], answer:1},
+  {level:"basic", type:"choice", ko:"냉장고에 우유가 조금 있다. → There ___ some milk in the refrigerator.", zh:"冰箱里有一些牛奶。→ There ___ some milk in the refrigerator.", ru:"В холодильнике есть немного молока. → There ___ some milk in the refrigerator.", options:["is","are"], answer:0},
+  {level:"basic", type:"choice", ko:"방 안에 고양이가 두 마리 있다. → There ___ two cats in the room.", zh:"房间里有两只猫。→ There ___ two cats in the room.", ru:"В комнате есть две кошки. → There ___ two cats in the room.", options:["is","are"], answer:1},
+  {level:"basic", type:"choice", ko:"책상 위에 책이 세 권 있다. 알맞은 문장은?", zh:"桌子上有三本书。哪个句子正确？", ru:"На столе лежат три книги. Какое предложение правильное?", options:["There is three books.","There are three books."], answer:1},
+  {level:"basic", type:"choice", ko:"컵 안에 물이 조금 있다. 알맞은 문장은?", zh:"杯子里有一些水。哪个句子正确？", ru:"В чашке есть немного воды. Какое предложение правильное?", options:["There are some water.","There is some water."], answer:1},
+
+  {level:"advanced", type:"text2",
+   ko:"big의 비교급과 최상급을 직접 쓰세요.",
+   zh:"请直接写出 big 的比较级和最高级。",
+   ru:"Напишите сравнительную и превосходную степени слова big.",
+   labels:["비교급 / 比较级 / сравнительная","최상급 / 最高级 / превосходная"],
+   answers:["bigger","biggest"]},
+
+  {level:"advanced", type:"text2",
+   ko:"happy의 비교급과 최상급을 직접 쓰세요.",
+   zh:"请直接写出 happy 的比较级和最高级。",
+   ru:"Напишите сравнительную и превосходную степени слова happy.",
+   labels:["비교급 / 比较级 / сравнительная","최상급 / 最高级 / превосходная"],
+   answers:["happier","happiest"]},
+
+  {level:"advanced", type:"text1",
+   ko:"expensive의 비교급을 직접 쓰세요.",
+   zh:"请直接写出 expensive 的比较级。",
+   ru:"Напишите сравнительную степень слова expensive.",
+   labels:["비교급 / 比较级 / сравнительная"],
+   answers:["more expensive"]},
+
+  {level:"advanced", type:"text2",
+   ko:"good의 비교급과 최상급을 직접 쓰세요.",
+   zh:"请直接写出 good 的比较级和最高级。",
+   ru:"Напишите сравнительную и превосходную степени слова good.",
+   labels:["비교급 / 比较级 / сравнительная","최상급 / 最高级 / превосходная"],
+   answers:["better","best"]},
+
+  {level:"advanced", type:"choice", ko:"There ___ a cake on the table yesterday.", zh:"请选择正确的词：There ___ a cake on the table yesterday.", ru:"Выберите правильное слово: There ___ a cake on the table yesterday.", options:["is","are","was","were"], answer:2},
+  {level:"advanced", type:"choice", ko:"There ___ two people here last night.", zh:"请选择正确的词：There ___ two people here last night.", ru:"Выберите правильное слово: There ___ two people here last night.", options:["is","are","was","were"], answer:3},
+  {level:"advanced", type:"choice", ko:"다음 문장에서 틀린 부분은? — There was three books on the desk yesterday.", zh:"下面句子中错误的部分是？— There was three books on the desk yesterday.", ru:"Какая часть предложения неправильная? — There was three books on the desk yesterday.", options:["There","was","three books","yesterday"], answer:1},
+  {level:"advanced", type:"choice", ko:"다음 중 맞는 문장은?", zh:"下面哪一个句子是正确的？", ru:"Какое предложение правильное?", options:["There were a cat in the room yesterday.","There was three students at school yesterday.","There was a cat in the room yesterday.","There is two books on the desk now."], answer:2}
+];
+
+let phase = "basic";
+let phaseQs = qs.slice(0,12);
+let phaseOffset = 0;
+let index = 0;
+const answers = Array(qs.length).fill(null);
+
+const koQ = document.getElementById("koQ");
+const zhQ = document.getElementById("zhQ");
+const ruQ = document.getElementById("ruQ");
+const options = document.getElementById("options");
+const nextBtn = document.getElementById("nextBtn");
+const prevBtn = document.getElementById("prevBtn");
+const progressLabel = document.getElementById("progressLabel");
+const sectionLabel = document.getElementById("sectionLabel");
+const barFill = document.getElementById("barFill");
+const badge = document.getElementById("badge");
+
+function gi(){ return phaseOffset + index; }
+function norm(s){ return (s||"").trim().toLowerCase().replace(/\s+/g," "); }
+
+function isAnswered(q, a){
+  if(q.type==="choice") return a!==null;
+  if(q.type==="text1") return Array.isArray(a) && norm(a[0])!=="";
+  if(q.type==="text2") return Array.isArray(a) && norm(a[0])!=="" && norm(a[1])!=="";
+  return false;
+}
+
+function render(){
+  const q = phaseQs[index];
+  koQ.textContent = q.ko; zhQ.textContent = q.zh; ruQ.textContent = q.ru;
+  options.innerHTML = "";
+
+  if(q.type==="choice"){
+    q.options.forEach((opt,i)=>{
+      const label = document.createElement("label");
+      label.className = "option" + (answers[gi()]===i ? " selected" : "");
+      const radio = document.createElement("input");
+      radio.type="radio"; radio.name="q"; radio.checked = answers[gi()]===i;
+      radio.addEventListener("change",()=>{
+        answers[gi()] = i;
+        document.querySelectorAll(".option").forEach(x=>x.classList.remove("selected"));
+        label.classList.add("selected");
+        nextBtn.disabled = false;
+      });
+      const span=document.createElement("span");
+      span.textContent = `${i+1}. ${opt}`;
+      label.appendChild(radio); label.appendChild(span);
+      options.appendChild(label);
+    });
+  } else {
+    const box = document.createElement("div");
+    box.className = "textAnswers";
+    const arr = Array.isArray(answers[gi()]) ? answers[gi()] : Array(q.answers.length).fill("");
+    answers[gi()] = arr;
+
+    const row = document.createElement("div");
+    row.className = q.type==="text2" ? "textAnswerRow" : "";
+    q.answers.forEach((_,i)=>{
+      const wrap=document.createElement("div");
+      const lab=document.createElement("div");
+      lab.className="inputLabel";
+      lab.textContent=q.labels[i];
+      const inp=document.createElement("input");
+      inp.type="text";
+      inp.className="textAnswer";
+      inp.autocomplete="off";
+      inp.spellcheck=false;
+      inp.placeholder="직접 입력 / 直接输入 / Введите ответ";
+      inp.value=arr[i] || "";
+      inp.addEventListener("input",()=>{
+        answers[gi()][i]=inp.value;
+        nextBtn.disabled = !isAnswered(q, answers[gi()]);
+      });
+      wrap.appendChild(lab); wrap.appendChild(inp);
+      row.appendChild(wrap);
+    });
+    box.appendChild(row);
+    options.appendChild(box);
+  }
+
+  progressLabel.textContent = `${index+1} / ${phaseQs.length}`;
+  barFill.style.width = `${((index+1)/phaseQs.length)*100}%`;
+  const adv = phase==="advanced";
+  sectionLabel.textContent = adv ? "심화 / 进阶 / Продвинутый" : "기본 / 基础 / Базовый";
+  badge.textContent = sectionLabel.textContent;
+  badge.className = "badge" + (adv ? " advanced" : "");
+  prevBtn.style.visibility = index===0 ? "hidden" : "visible";
+  nextBtn.textContent = index===phaseQs.length-1 ? (adv ? "최종 결과 보기" : "기본 결과 보기") : "다음 →";
+  nextBtn.disabled = !isAnswered(q, answers[gi()]);
+}
+
+prevBtn.onclick = ()=>{ if(index>0){index--; render();} };
+nextBtn.onclick = ()=>{
+  if(!isAnswered(phaseQs[index], answers[gi()])) return;
+  if(index<phaseQs.length-1){ index++; render(); }
+  else phase==="basic" ? showBasicResult() : showFinalResult();
+};
+
+function isCorrect(q,a){
+  if(q.type==="choice") return a===q.answer;
+  if(!Array.isArray(a)) return false;
+  return q.answers.every((ans,i)=>norm(a[i])===norm(ans));
+}
+function basicScore(){
+  return qs.slice(0,12).reduce((s,q,i)=>s+(isCorrect(q,answers[i])?1:0),0);
+}
+function advancedScore(){
+  return qs.slice(12).reduce((s,q,i)=>s+(isCorrect(q,answers[i+12])?1:0),0);
+}
+function studentText(){
+  const cls=document.getElementById("className").value.trim();
+  const name=document.getElementById("studentName").value.trim();
+  return [cls,name].filter(Boolean).join("  ") || "학생 정보 미입력";
+}
+
+function showBasicResult(){
+  const b=basicScore();
+  const wrong=[];
+  qs.slice(0,12).forEach((q,i)=>{ if(!isCorrect(q,answers[i])) wrong.push(i+1); });
+
+  document.getElementById("quizArea").style.display="none";
+  document.getElementById("resultArea").style.display="block";
+  document.getElementById("who").textContent=studentText();
+  document.getElementById("basicScore").textContent=`${b} / 12`;
+  document.getElementById("advScore").textContent=`선택`;
+  document.getElementById("totalScore").textContent=`${b} / 12`;
+
+  document.querySelector(".wrong").innerHTML = `
+    <strong>기본 결과 / 基础结果 / Результат базовой части</strong>
+    <div style="margin:10px 0 14px;">
+      다시 볼 문제 / 需要复习的题目 / Вопросы для повторения:
+      <b>${wrong.length ? wrong.join(", ")+"번" : "없음 / 无 / Нет"}</b>
+    </div>
+    <div class="note" style="margin-bottom:14px;">
+      심화 문제는 원하는 학생만 도전하세요.<br>
+      进阶题为自愿挑战。<br>
+      Задания повышенной сложности — по желанию.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <button id="finishBasic" class="secondary">여기까지 / 到这里 / Закончить</button>
+      <button id="goAdvanced" class="primary">심화 도전 → / 挑战进阶 / Продолжить</button>
+    </div>
+  `;
+  document.querySelector(".restart").style.display="none";
+  document.getElementById("finishBasic").onclick = finishBasic;
+  document.getElementById("goAdvanced").onclick = startAdvanced;
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function finishBasic(){
+  const b=basicScore();
+  document.querySelector(".wrong").innerHTML = `
+    <strong>완료 / 完成 / Готово</strong>
+    <div class="note">
+      기본 점수: <b>${b} / 12</b><br><br>
+      이제 종이 학습지로 개념을 정리하세요.<br>
+      现在请用纸质学习单整理概念。<br>
+      Теперь переходите к рабочему листу и повторите правила.
+    </div>
+  `;
+  document.querySelector(".restart").style.display="block";
+  document.querySelector(".restart").textContent="기본 다시 풀기 / 重做基础题 / Пройти базовую часть снова";
+}
+
+function startAdvanced(){
+  phase="advanced";
+  phaseQs=qs.slice(12);
+  phaseOffset=12;
+  index=0;
+  document.getElementById("resultArea").style.display="none";
+  document.getElementById("quizArea").style.display="block";
+  render();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function showFinalResult(){
+  const b=basicScore(), a=advancedScore();
+  const wrong=[];
+  qs.forEach((q,i)=>{ if(!isCorrect(q,answers[i])) wrong.push(i+1); });
+
+  document.getElementById("quizArea").style.display="none";
+  document.getElementById("resultArea").style.display="block";
+  document.getElementById("who").textContent=studentText();
+  document.getElementById("basicScore").textContent=`${b} / 12`;
+  document.getElementById("advScore").textContent=`${a} / 8`;
+  document.getElementById("totalScore").textContent=`${b+a} / 20`;
+  document.querySelector(".wrong").innerHTML = `
+    <strong>다시 볼 문제 / 需要复习的题目 / Вопросы для повторения</strong>
+    <div style="margin-top:10px;">${wrong.length ? wrong.join(", ")+"번" : "없음 / 无 / Нет"}</div>
+    <div class="note" style="margin-top:10px;">
+      심화 비교급·최상급 문제는 직접 입력한 답을 기준으로 채점했습니다.<br>
+      进阶比较级和最高级题按照直接输入的答案评分。<br>
+      Задания повышенной сложности на степени сравнения проверены по введённым ответам.
+    </div>
+  `;
+  document.querySelector(".restart").style.display="block";
+  document.querySelector(".restart").textContent="처음부터 다시 / 重新开始 / Начать заново";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+function restartQuiz(){
+  answers.fill(null);
+  phase="basic"; phaseQs=qs.slice(0,12); phaseOffset=0; index=0;
+  document.getElementById("resultArea").style.display="none";
+  document.getElementById("quizArea").style.display="block";
+  render();
+}
+render();
+</script>
+</body>
+</html>
